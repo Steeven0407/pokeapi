@@ -7,7 +7,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "Pokemones")
 public class Pokemon {
@@ -27,7 +37,7 @@ public class Pokemon {
     @Column(
         columnDefinition = "TEXT"
     )
-    private String tipo;
+    private String tipos;
 
     @Column(
         nullable = false
@@ -39,81 +49,11 @@ public class Pokemon {
     @Column(
         columnDefinition = "TEXT"
     )
-    private String region;
+    private String regiones;
 
     @Column(
         nullable = false
     )
     private String sprite;
 
-    public Pokemon() {
-    }
-
-    public Pokemon(String nombre, String tipo, int altura, int peso, String region, String sprite) {
-        this.nombre = nombre;
-        this.tipo = tipo;
-        this.altura = altura;
-        this.peso = peso;
-        this.region = region;
-        this.sprite = sprite;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public int getAltura() {
-        return altura;
-    }
-
-    public void setAltura(int altura) {
-        this.altura = altura;
-    }
-
-    public int getPeso() {
-        return peso;
-    }
-
-    public void setPeso(int peso) {
-        this.peso = peso;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
-    public String getSprite() {
-        return sprite;
-    }
-
-    public void setSprite(String sprite) {
-        this.sprite = sprite;
-    }
-
-    
-    
 }
