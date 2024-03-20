@@ -42,18 +42,20 @@ public class Pokemon {
     @Column(
         nullable = false
     )
-    private int altura;
-
-    private int peso;
-
-    @Column(
-        columnDefinition = "TEXT"
-    )
-    private String regiones;
+    private float altura;
 
     @Column(
         nullable = false
     )
-    private String sprite;
+    private float peso;
+
+    private String region;
+
+    @Column(
+        nullable = false
+    )
+    private String imageUrl;
+
+    private String imageId;
 
 }
