@@ -1,11 +1,13 @@
 package com.api.pokeapi.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.api.pokeapi.models.Pokemon;
 import com.api.pokeapi.repositories.PokemonRepository;
+
 
 @Service
 public class PokemonService {
@@ -16,17 +18,24 @@ public class PokemonService {
         this.pokemonRepository = pokemonRepository;
     }
 
-    public List<Pokemon> findAllPokemon(){
-        return this.pokemonRepository.findAll(); 
+    public List<Pokemon> findAllPokemon() {
+        return this.pokemonRepository.findAll();
     }
 
-    public Pokemon findPokemonById(Integer id){
-        return this.pokemonRepository.findById(id)
-                            .orElse(new Pokemon());
+    public Optional<Pokemon> findPokemonById(Integer id){
+        return this.pokemonRepository.findById(id);
     }
 
-    public Pokemon createPokemon(Pokemon pokemon) {
-        return this.pokemonRepository.save(pokemon);
+    public Optional<Pokemon> findPokemonByName(String name){
+        return Optional.ofNullable(this.pokemonRepository.findByNombre(name));
+    }
+
+    public void createPokemon(Pokemon pokemon) {
+        this.pokemonRepository.save(pokemon);
+    }
+
+    public void deletePokemon(Integer id) {
+        this.pokemonRepository.deleteById(id);
     }
     
 }
