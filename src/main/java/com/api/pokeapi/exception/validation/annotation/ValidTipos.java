@@ -1,4 +1,4 @@
-package com.api.pokeapi.validation.annotation;
+package com.api.pokeapi.exception.validation.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.api.pokeapi.validation.validator.ValidTiposValidator;
+import com.api.pokeapi.exception.validation.validator.ValidTiposValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

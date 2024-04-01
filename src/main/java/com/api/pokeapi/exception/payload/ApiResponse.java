@@ -1,4 +1,4 @@
-package com.api.pokeapi.payload;
+package com.api.pokeapi.exception.payload;
 
 import java.time.LocalDateTime;
 

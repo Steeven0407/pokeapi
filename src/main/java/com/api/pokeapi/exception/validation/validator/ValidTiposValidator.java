@@ -1,8 +1,8 @@
-package com.api.pokeapi.validation.validator;
+package com.api.pokeapi.exception.validation.validator;
 
 import java.util.List;
 
-import com.api.pokeapi.validation.annotation.ValidTipos;
+import com.api.pokeapi.exception.validation.annotation.ValidTipos;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

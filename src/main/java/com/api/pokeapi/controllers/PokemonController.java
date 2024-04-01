@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.pokeapi.DTO.PokemonDTO;
 import com.api.pokeapi.exception.PokemonConversionException;
 import com.api.pokeapi.exception.ResourceAlreadyExistsException;
 import com.api.pokeapi.exception.ResourceNotFoundException;
+import com.api.pokeapi.exception.validation.annotation.ValidFile;
 import com.api.pokeapi.models.Pokemon;
+import com.api.pokeapi.models.DTO.PokemonDTO;
 import com.api.pokeapi.services.CloudinaryService;
 import com.api.pokeapi.services.PokemonService;
-import com.api.pokeapi.validation.annotation.ValidFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +36,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/pokeapi/v1")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PokemonController {
 
     private final PokemonService pokemonService;

@@ -1,8 +1,8 @@
-package com.api.pokeapi.validation.validator;
+package com.api.pokeapi.exception.validation.validator;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.api.pokeapi.validation.annotation.ValidFile;
+import com.api.pokeapi.exception.validation.annotation.ValidFile;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import com.api.pokeapi.payload.ApiResponse;
+import com.api.pokeapi.exception.payload.ApiResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

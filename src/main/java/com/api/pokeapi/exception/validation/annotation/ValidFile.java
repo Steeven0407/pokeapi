@@ -1,10 +1,10 @@
-package com.api.pokeapi.validation.annotation;
+package com.api.pokeapi.exception.validation.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
-import com.api.pokeapi.validation.validator.ValidFileValidator;
+import com.api.pokeapi.exception.validation.validator.ValidFileValidator;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

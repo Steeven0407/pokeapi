@@ -1,11 +1,11 @@
-package com.api.pokeapi.DTO;
+package com.api.pokeapi.models.DTO;
 
 import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 
-import com.api.pokeapi.validation.annotation.ValidTipos;
+import com.api.pokeapi.exception.validation.annotation.ValidTipos;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
