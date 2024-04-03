@@ -48,6 +48,7 @@ public class CloudinaryService {
         File file = convert(multipartFile);
 
         Map opciones = ObjectUtils.asMap(
+            "folder", "poke_api",
             "public_id", public_id
         );
 

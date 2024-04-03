@@ -8,15 +8,14 @@ import org.springframework.stereotype.Service;
 import com.api.pokeapi.models.Pokemon;
 import com.api.pokeapi.repositories.PokemonRepository;
 
+import lombok.RequiredArgsConstructor;
+
 
 @Service
+@RequiredArgsConstructor
 public class PokemonService {
 
     private final PokemonRepository pokemonRepository;
-
-    public PokemonService(PokemonRepository pokemonRepository) {
-        this.pokemonRepository = pokemonRepository;
-    }
 
     public List<Pokemon> findAllPokemon() {
         return this.pokemonRepository.findAll();

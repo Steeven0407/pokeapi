@@ -3,7 +3,6 @@ package com.api.pokeapi.models.DTO;
 import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.URL;
 
 import com.api.pokeapi.exception.validation.annotation.ValidTipos;
 
@@ -14,8 +13,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 public record PokemonDTO(
-
-    Integer id,
 
     @NotBlank(message = "El nombre del Pokémon es obligatorio")
     @Length(min = 3, max = 20, message = "El nobre del Pokémon debe contener entre 3 y 20 caracteres")
@@ -33,10 +30,7 @@ public record PokemonDTO(
     @Digits(integer = Integer.MAX_VALUE, fraction = 1, message = "El peso no debe sobrepasar los 2 puntos decimales")
     float peso,
 
-    String region,
-
-    @URL(message = "El sprite debe corresponder con una URL válida")
-    String sprite
+    String region
     
 ) {
 
