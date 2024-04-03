@@ -1,23 +1,22 @@
 package com.api.pokeapi.exception.payload;
 
-import java.time.LocalDateTime;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ApiResponse {
 
-    private LocalDateTime tiempo = LocalDateTime.now();
+    private boolean flag; // Two values: true means success, false means not success
 
-    private String message;
+    private Integer code; // Status code. e.g., 200
 
-    private String address;
+    private String message; // Response message
 
-    public ApiResponse(String message, String address) {
-        this.message = message;
-        this.address = address.replace("uri=", "");
-    }
+    private Object data; // The response payload
     
 }

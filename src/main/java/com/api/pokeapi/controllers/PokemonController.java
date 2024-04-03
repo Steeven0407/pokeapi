@@ -1,12 +1,10 @@
 package com.api.pokeapi.controllers;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,9 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.api.pokeapi.exception.PokemonConversionException;
 import com.api.pokeapi.exception.ResourceAlreadyExistsException;
 import com.api.pokeapi.exception.ResourceNotFoundException;
+import com.api.pokeapi.exception.payload.ApiResponse;
 import com.api.pokeapi.exception.validation.annotation.ValidFile;
 import com.api.pokeapi.models.Pokemon;
 import com.api.pokeapi.models.DTO.PokemonDTO;
+import com.api.pokeapi.models.DTO.PokemonResponseDTO;
 import com.api.pokeapi.services.CloudinaryService;
 import com.api.pokeapi.services.PokemonService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,39 +33,43 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 
 @RestController
 @RequestMapping("/pokeapi/v1")
 @CrossOrigin(origins = "http://localhost:5173", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@RequiredArgsConstructor
 public class PokemonController {
 
+
+    // Services
     private final PokemonService pokemonService;
     private final CloudinaryService cloudinaryService;
 
-    public PokemonController(PokemonService pokemonService, CloudinaryService cloudinaryService) {
-        this.pokemonService = pokemonService;
-        this.cloudinaryService = cloudinaryService;
-    }
 
     @GetMapping("/findAll")
     public ResponseEntity<?> findAllPokemon(){
-
-        
-        List<PokemonDTO> pokemonList = this.pokemonService.findAllPokemon()
+  
+        List<PokemonResponseDTO> pokemonList = this.pokemonService.findAllPokemon()
             .stream()
-            .map(t -> {
-                try {
-                    return toPokemonDto(t);
-                } catch (JsonProcessingException e) {
+            .map(pokemon -> {
+                try{
+                    return tPokemonResponseDTO(pokemon);
+                }catch(JsonProcessingException e){
                     throw new PokemonConversionException("Error al procesar los datos del Pokémon", e);
                 }
             })
             .toList();
 
-        return ResponseEntity.ok(pokemonList);
-
-        
+        return ResponseEntity.ok(ApiResponse
+            .builder()
+            .flag(true)
+            .code(200)
+            .message("Info obtenida correctamente")
+            .data(pokemonList)
+            .build()
+        );
 
     }
 
@@ -81,9 +85,16 @@ public class PokemonController {
             }
 
             Pokemon pokemon = pokemonOptional.get();
-            PokemonDTO pokemonDto = toPokemonDto(pokemon);
+            PokemonResponseDTO pokemonResponseDto = tPokemonResponseDTO(pokemon);
             
-            return ResponseEntity.ok(pokemonDto);
+            return ResponseEntity.ok(ApiResponse
+                .builder()
+                .flag(true)
+                .code(200)
+                .message("Pokémon obtenido correctamente")
+                .data(pokemonResponseDto)
+                .build()
+            );
         
         } catch(JsonProcessingException e){
             throw new PokemonConversionException("Error al procesar los datos de los Pokémones", e);
@@ -98,7 +109,7 @@ public class PokemonController {
         @RequestParam("altura") float altura,
         @RequestParam("peso") float peso,
         @RequestParam("region") String region, 
-        @RequestParam("file") @Valid @ValidFile MultipartFile file,
+        @RequestParam("file") @Valid @ValidFile(message = "Archivo de imagen no valido") MultipartFile file,
         @Valid PokemonDTO pokemonDTO
     ) throws IOException {
 
@@ -114,16 +125,24 @@ public class PokemonController {
 
             Pokemon pokemon = this.toPokemon(pokemonDTO);
 
-            Map<String, String> map = this.cloudinaryService.uploadFile(file, file.getOriginalFilename().split("\\.")[0]);
+            // upload the file
+            Map<String, String> map = this.cloudinaryService.uploadFile(file, pokemon.getNombre());
 
+            // set the file settings
             pokemon.setImageUrl(map.get("secure_url"));
             pokemon.setImageId(map.get("public_id"));
+
+            // save the pokemon
             this.pokemonService.createPokemon(pokemon);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "El pokémon fue registrado correctamente");
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(ApiResponse
+                .builder()
+                .flag(true)
+                .code(200)
+                .message("Pokémon registrado correctamente")
+                .data("No data provided")
+                .build()
+            );
 
        }catch(JsonProcessingException e){
             throw new PokemonConversionException("Error al intentar crear el Pokémon", e);
@@ -140,16 +159,23 @@ public class PokemonController {
             throw new ResourceNotFoundException("Pokémon", "identificador", id);
         }
 
+        // get the pokemon
         Pokemon pokemon = pokemonOptional.get();
 
+        // delete the file associated 
         this.cloudinaryService.delete(pokemon.getImageId());
 
+        // delete the pokemon
         this.pokemonService.deletePokemon(id);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Pokémon eliminado correctamente"); 
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse
+            .builder()
+            .flag(true)
+            .code(200)
+            .message("Pokémon eliminado correctamente")
+            .data("No data provided")
+            .build()
+        );
 
     }
 
@@ -161,7 +187,7 @@ public class PokemonController {
         @RequestParam("altura") float altura,
         @RequestParam("peso") float peso,
         @RequestParam("region") String region, 
-        @RequestParam(required = false, name = "file") @Valid @ValidFile MultipartFile file,
+        @RequestParam(required = false, name = "file") @Valid @ValidFile(message = "Archivo de imagen no valido") MultipartFile file,
         @Valid PokemonDTO pokemonDTO
     ) throws IOException{
 
@@ -171,48 +197,62 @@ public class PokemonController {
             throw new ResourceNotFoundException("Pokémon", "identificador", id);
         }
 
+        // get the pokemon
         Pokemon pokemon = pokemonOptional.get();
+        String nombreAnt = pokemon.getNombre();
 
         if (pokemonService.findPokemonByName(nombre).isPresent() && !nombre.toLowerCase().equals(pokemon.getNombre().toLowerCase())){
             throw new ResourceAlreadyExistsException("Pokémon", "nombre", nombre);
         }
 
+        // update data
         pokemon.setNombre(pokemonDTO.nombre());
         pokemon.setTipos(tipos);
         pokemon.setAltura(pokemonDTO.altura());
         pokemon.setPeso(pokemonDTO.peso());
         pokemon.setRegion(pokemonDTO.region());
 
+        // update file if exists
         if (file != null){
-            Map<String, String> result = this.cloudinaryService.updateFile(file, file.getOriginalFilename().split("\\.")[0]);
+            Map<String, String> result = this.cloudinaryService.updateFile(file, nombreAnt);
             pokemon.setImageUrl(result.get("secure_url"));
             pokemon.setImageId(result.get("public_id"));
         }
 
+        // save changes
         this.pokemonService.createPokemon(pokemon);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Pokémon actualizado correctamente"); 
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse
+            .builder()
+            .flag(true)
+            .code(200)
+            .message("Pokémon actualizado correctamente")
+            .data("No data provided")
+            .build()
+        );
 
     }
 
-    private PokemonDTO toPokemonDto(Pokemon pokemon) throws JsonProcessingException{
 
+    // Converter methods
+
+    private PokemonResponseDTO tPokemonResponseDTO(Pokemon pokemon) throws JsonProcessingException{
+
+        
         ObjectMapper mapper = new ObjectMapper();
 
         List<String> tipos = mapper.readValue(pokemon.getTipos(), new TypeReference<List<String>>(){});
 
-        return new PokemonDTO(
-            pokemon.getId(), 
-            pokemon.getNombre(), 
-            tipos, 
-            pokemon.getAltura(), 
-            pokemon.getPeso(), 
-            pokemon.getRegion(), 
-            pokemon.getImageUrl()
-        );
+        return PokemonResponseDTO
+            .builder()
+            .id(pokemon.getId())
+            .nombre(pokemon.getNombre())
+            .tipos(tipos)
+            .altura(pokemon.getAltura())
+            .peso(pokemon.getPeso())
+            .region(pokemon.getRegion())
+            .sprite(pokemon.getImageUrl())
+            .build();
 
     }
 

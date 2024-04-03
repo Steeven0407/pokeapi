@@ -1,22 +1,29 @@
 package com.api.pokeapi.exception;
 
+import java.io.IOException;
+
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.api.pokeapi.exception.payload.ApiResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Errores de campos
+    // Data fields errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleInvalidArguments(MethodArgumentNotValidException exception, WebRequest webRequest){
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handleInvalidArguments(MethodArgumentNotValidException exception){
 
         StringBuilder builder;
         builder = new StringBuilder();
@@ -25,41 +32,184 @@ public class GlobalExceptionHandler {
             builder.append(error.getDefaultMessage()).append(", ");
         });
 
-        ApiResponse apiResponse = new ApiResponse(builder.toString(), webRequest.getDescription(false));
-        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(400)
+            .message(builder.toString())
+            .data("Input error")
+            .build();
 
     }
 
+    // Incorrect data type method arguments
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handleMethodValidationError(HandlerMethodValidationException exception){
+
+        StringBuilder builder;
+        builder = new StringBuilder();
+
+        exception.getAllErrors().forEach(error -> {
+            builder.append(error.getDefaultMessage()).append(", ");
+        });
+
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(400)
+            .message(builder.toString())
+            .data(exception.getCause())
+            .build();
+
+    }
+
+    // Incorrect data type method arguments
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handleTypeMismatchException(MethodArgumentTypeMismatchException exception){
+
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(400)
+            .message("Favor proveer el tipo de argumento correcto")
+            .data(exception.getMessage())
+            .build();
+
+    }
+
+    // Deserialization error
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-                                                               WebRequest request) {
-        String errorMessage = "Error en la deserialización del JSON: " + ex.getMessage();
-        ApiResponse apiResponse = new ApiResponse(errorMessage, request.getDescription(false));
-        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handleHttpMessageNotReadable(HttpMessageNotReadableException exception) {
+
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(400)
+            .message("Error en la deserialización del JSON")
+            .data(exception.getMessage())
+            .build();
+        
     }
 
-    // En caso de no encontrar pokemones
+    // processing pokemon error
+    @ExceptionHandler(JsonProcessingException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handleJsonProcessingException(JsonProcessingException exception){
+
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(400)
+            .message(exception.getMessage())
+            .data("Pokémon no identificado")
+            .build();
+
+    }
+
+    // File exception
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handleIoException(IOException exception){
+
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(400)
+            .message("Error al subir el archivo")
+            .data(exception.getMessage())
+            .build();
+
+    }
+
+    // Pokemon resource not found
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse> handlerResourceNotFoundException(ResourceNotFoundException ex, WebRequest webRequest){
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handlerResourceNotFoundException(ResourceNotFoundException exception){
 
-        ApiResponse apiResponse = new ApiResponse(ex.getMessage(), webRequest.getDescription(false));
-        return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(400)
+            .message(exception.getMessage())
+            .data("Pokémon no identificado")
+            .build();
 
     }
 
-    // Controla los errores globales de los path en 404
-    @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<ApiResponse> handlerNoHandlerFoundException(NoHandlerFoundException  exception,
-                                                                      WebRequest webRequest) {
-        ApiResponse apiResponse = new ApiResponse(exception.getMessage(), webRequest.getDescription(false));
-        return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
-    }
-
-    // Controla los errores de duplicidad de nombre para los pokémones
+    // Pokemon already exists
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<ApiResponse> handlerResourceAlreadyExistsException(ResourceAlreadyExistsException exception, WebRequest webRequest){
-        ApiResponse apiResponse = new ApiResponse(exception.getMessage(), webRequest.getDescription(false));
-        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse handlerResourceAlreadyExistsException(ResourceAlreadyExistsException exception){
+        
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(400)
+            .message(exception.getMessage())
+            .data("Pokémon ya existente")
+            .build();
+
+    }
+
+    // 404 errors
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    ApiResponse handleNoResourceFoundException(NoResourceFoundException exception){
+        
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(404)
+            .message("Recurso o URL no identificado")
+            .data(exception.getMessage())
+            .build();
+
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiResponse handlerNoHandlerFoundException(NoHandlerFoundException exception) {
+        
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(404)
+            .message("No fue posible encontrar un manejador adecuado")
+            .data(exception.getMessage())
+            .build();
+
+    }
+
+    // Server errors
+    @ExceptionHandler(DataAccessException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    ApiResponse handleDataAccessException(DataAccessException exception){
+
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(500)
+            .message("Error de base de datos")
+            .data(exception.getMessage())
+            .build();
+
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    ApiResponse handleOtherException(Exception exception){
+
+        return ApiResponse
+            .builder()
+            .flag(false)
+            .code(500)
+            .message("Error interno de servidor")
+            .data(exception)
+            .build();
+
     }
     
 }
