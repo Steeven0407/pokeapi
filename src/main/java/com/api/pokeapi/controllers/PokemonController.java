@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/pokeapi/v1")
-@CrossOrigin(origins = "http://localhost:5173", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RequiredArgsConstructor
 public class PokemonController {
 

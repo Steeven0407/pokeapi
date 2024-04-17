@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  pokeapi-front:
+    container_name: pokeapi-front-app
+    image: luc4shk/pokeapi
+    ports:
+      - 3000:3000
+    networks:
+      - playground-network
+    depends_on:
+      - pokeapi-spring-boot-app
+  pokeapi-spring-boot-app:
+    container_name: pokeapi-spring-app
+    image: jaip3r/pokeapi-back
+    ports:
+      - 8080:8080
+    environment:
+      - DATABASE_URL=jdbc:mysql://pokemon_db:3306/pokeapi 
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - CLOUDINARY_URL=cloudinary://892731456566195:mPxBdk2BN45k6r-TDXyKyPOCOak@dojljgscf
+    depends_on:
+      - pokemon_db
+    networks:
+      - playground-network
+  pokemon_db:
+    container_name: mysql_db
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=pokeapi
+    ports:
+      - '3307:3306'
+    expose:
+      - '3307'
+    volumes:
+      - my-db:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "pokemon_db", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - playground-network
+
+volumes:
+  my-db:
+networks:
+  playground-network:

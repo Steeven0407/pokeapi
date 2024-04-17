@@ -1,6 +1,6 @@
 spring: 
   datasource:
-    url: jdbc:${DB_ENGINE}://localhost:${DB_PORT}/${DB_NAME}
+    url: ${DATABASE_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
@@ -11,4 +11,8 @@ spring:
       hibernate:
         format_sql: true
     database: mysql
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+application:
+  services:
+      cloudinary_service: ${CLOUDINARY_URL}
